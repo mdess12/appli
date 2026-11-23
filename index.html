@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6faee">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Journal">
+<title>Mon journal d'émotions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--ink:#2f3f35;--mute:#617466;--card:rgba(255,255,255,.74);--line:rgba(47,63,53,.12);--acc:#bcd6a6;--accd:#4a6b3a;--acc2:#e9dc9a;--onacc:#243420;--chip:rgba(255,255,255,.85);--bg:#f6faee;--g1:#fbfdf6;--g2:#e9f2d9;--g3:#f2f8e6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#eef0df;--mute:#adb9a9;--card:rgba(255,255,255,.08);--line:rgba(238,240,223,.17);--acc:#a9d0b0;--accd:#a9d0b0;--acc2:#cdb75a;--onacc:#16201a;--chip:rgba(255,255,255,.1);--bg:#18211b;--g1:#2a2d1b;--g2:#1c2b20;--g3:#222a1a}}
+:root[data-theme="dark"]{--ink:#eef0df;--mute:#adb9a9;--card:rgba(255,255,255,.08);--line:rgba(238,240,223,.17);--acc:#a9d0b0;--accd:#a9d0b0;--acc2:#cdb75a;--onacc:#16201a;--chip:rgba(255,255,255,.1);--bg:#18211b;--g1:#2a2d1b;--g2:#1c2b20;--g3:#222a1a}
+*,*:before,*:after{box-sizing:inherit}
+html,body{height:100%}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;overflow:hidden;color:var(--ink);background:var(--bg);font:17px/1.55 Nunito,system-ui,sans-serif}
+#bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(circle at 18% 12%,var(--g1),transparent 55%),radial-gradient(circle at 85% 85%,var(--g2),transparent 60%),linear-gradient(135deg,var(--g3),var(--g2),var(--g1),var(--g2));background-size:230% 230%;transition:background-position 1.8s ease}
+#app{position:relative;height:100%;max-width:560px;margin:0 auto;overflow:hidden}
+.panel{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;filter:blur(14px);transform:scale(.985);transition:opacity .6s ease,filter .6s ease,transform .6s ease,visibility 0s .6s}
+.panel:not(.on){pointer-events:none}
+.panel.on{opacity:1;visibility:visible;filter:none;transform:none;transition-delay:0s}
+.scroll{flex:1;min-height:0;overflow-y:auto;padding:0 22px 28px}
+h1,h2,.q,.clock,.row b{font-family:Lora,Georgia,serif;font-weight:500}
+.hero{display:block;width:100%;height:auto;max-height:36vh;margin-bottom:6px}
+.hello{margin:6px 0 0;color:var(--mute)}
+.clock{font-size:46px;line-height:1.1;margin:2px 0}
+.date{margin:0 0 14px;color:var(--mute)}.date:first-letter{text-transform:uppercase}
+h1{font-size:clamp(26px,7vw,32px);line-height:1.25;margin:0 0 22px}
+.big{display:block;width:100%;border:1px solid var(--line);border-radius:22px;padding:18px 20px;margin-bottom:12px;font:600 18px Nunito,sans-serif;text-align:left;color:var(--ink);background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);cursor:pointer}
+.big small{display:block;font-weight:400;color:var(--mute);font-size:14px}
+.big.main{background:var(--acc);color:var(--onacc);border-color:transparent}.big.main small{color:inherit;opacity:.85}
+.safe{color:var(--mute);font-size:14px;text-align:center;margin:18px 0 0}
+.top{display:flex;align-items:center;gap:14px;padding:14px 20px 4px}
+.x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:18px;cursor:pointer;flex:none}
+.prog{flex:1;height:6px;border-radius:9px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;width:10%;border-radius:9px;background:linear-gradient(90deg,var(--acc2),var(--acc));transition:width .8s ease}
+.top h2{margin:0;font-size:22px}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden}
+.slide{position:absolute;inset:0;overflow-y:auto;padding:6px 24px 16px;display:flex;flex-direction:column;opacity:0;visibility:hidden;filter:blur(12px);transform:translateX(26px);transition:opacity .6s ease,filter .6s ease,transform .6s ease,visibility 0s .6s}
+.slide.before{transform:translateX(-26px)}
+.slide:not(.on){pointer-events:none}
+.slide.on{opacity:1;visibility:inherit;filter:none;transform:none;transition-delay:0s}
+.in{margin:auto 0;padding:8px 0}
+.ic{width:60px;height:60px;display:block;margin-bottom:8px}
+.q{font-size:clamp(26px,7.4vw,34px);line-height:1.25;margin:4px 0 8px;letter-spacing:-.01em}
+.hint{color:var(--mute);margin:0 0 18px}
+.slide[data-opt] .hint:after{content:" (facultatif)"}
+textarea,input[type=datetime-local]{width:100%;font:inherit;font-size:18px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+textarea{min-height:150px;resize:none}
+:focus-visible{outline:2px solid var(--accd);outline-offset:2px}
+.nav{display:flex;gap:12px;padding:10px 20px 18px}
+.btn{flex:1;border:0;border-radius:18px;background:var(--acc);color:var(--onacc);font:700 17px Nunito,sans-serif;padding:15px;cursor:pointer}
+.btn.ghost{flex:none;background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:600;padding:15px 22px}
+.btn.sm{flex:none;width:100%;margin-top:8px}
+.link{background:none;border:0;color:var(--accd);font:600 15px Nunito,sans-serif;padding:8px 0;cursor:pointer;text-decoration:underline}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:15px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+input[type=range]{width:100%;height:36px;accent-color:var(--accd)}
+.ticks{display:flex;justify-content:space-between;color:var(--mute);font-size:13px;padding:0 4px;margin-top:-4px}
+.row{display:flex;justify-content:space-between;align-items:center;color:var(--mute);font-size:14px}
+.row b{font-size:46px;color:var(--ink)}
+.dlg{position:fixed;inset:0;background:rgba(40,60,48,.3);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
+.dbox{background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:22px;max-width:340px;width:100%}
+.dbox p{margin:0 0 16px;font:500 19px Lora,serif}.drow{display:flex;gap:10px}.drow .btn{flex:1;padding:13px 10px}
+#wheel{max-width:440px;margin:0 auto}
+#wheel svg{display:block;width:100%;height:auto;-webkit-tap-highlight-color:transparent}
+.sec{cursor:pointer;outline:none}.sec:focus-visible path{stroke:var(--accd);stroke-width:6}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card label{display:block;font-weight:600;margin-bottom:6px}.card small{display:block;color:var(--mute);font-weight:400}
+h2.t{font-size:28px;margin:6px 0 10px}
+.intro{color:var(--mute);margin:0 0 14px}
+.day{display:flex;justify-content:space-between;align-items:baseline;margin:20px 2px 8px}.day b:first-letter{text-transform:uppercase}
+.day b{font:500 19px Lora,serif}.day span{color:var(--mute);font-size:14px;text-transform:none}
+.e{border-left:4px solid var(--acc2);padding:12px 16px}
+.e time{font-weight:700}
+.e .tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.e .tag{background:var(--chip);border-radius:999px;padding:2px 10px;font-size:14px}
+.e p{margin:6px 0}.e b{color:var(--mute);font-weight:600}
+.del{background:none;border:0;color:var(--mute);cursor:pointer;float:right;font:inherit;font-size:14px}
+.empty{color:var(--mute);text-align:center}
+details.card{padding:0}
+details summary{padding:15px 18px;font:500 19px Lora,serif;cursor:pointer}
+details .in2{padding:0 18px 16px}details .in2 p{margin:0 0 8px}
+details .ex{border-left:3px solid var(--acc2);padding-left:10px;color:var(--mute);font-style:italic}
+.seg{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin:6px 20px 12px}
+.seg.sm{margin:0 0 12px}
+.seg button{flex:1;border:0;background:none;color:var(--mute);font:600 15px Nunito,sans-serif;padding:9px 6px;border-radius:10px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--acc);color:var(--onacc)}
+h3{font:500 19px Lora,serif;margin:0 0 10px}h3 small{display:block;font:400 13px Nunito,sans-serif;color:var(--mute);margin-top:2px}h3.sub{margin:18px 2px 8px}
+.ins{margin:0;padding-left:20px}.ins li{margin-bottom:8px}
+.note{color:var(--mute);font-size:13px;margin:10px 0 0}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;text-align:center}
+.tile b{display:block;font:500 28px Lora,serif}.tile span{color:var(--mute);font-size:13px}
+.bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:14px}
+.bl{flex:0 0 36%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bt{flex:1;height:12px;border-radius:9px;background:var(--line);overflow:hidden}.bt i{display:block;height:100%;border-radius:9px}
+.bv{flex:0 0 auto;min-width:70px;text-align:right;font-weight:700}.bv em{font-weight:400;font-style:normal;color:var(--mute);font-size:12px}
+.wknav{display:flex;align-items:center;justify-content:space-between;text-align:center;margin-bottom:12px}
+.wknav .x{font-size:22px}
+#wkchart svg{display:block;width:100%;height:auto}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:14px}.lg{display:flex;align-items:center;gap:6px}.lg i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.daystrip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
+.daystrip button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:8px 0;font:inherit;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.daystrip span{font-size:12px;color:var(--mute)}.daystrip b{font:500 18px Lora,serif}.daystrip em{font-style:normal;font-size:12px;color:var(--mute)}
+.daystrip button[aria-pressed=true]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}.daystrip button[aria-pressed=true] span,.daystrip button[aria-pressed=true] em{color:inherit}
+[hidden]{display:none!important}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.panel,.slide,#bg,.prog i{transition-duration:.01s!important;transition-delay:0s!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-sun" viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#f3dc86" opacity=".4"/><circle cx="30" cy="30" r="13" fill="#f0d36a"/></symbol>
+<symbol id="i-sprig" viewBox="0 0 60 60"><path d="M30 56V12" stroke="#8fb36f" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M30 40c-10 0-14-8-14-14 10 0 14 6 14 14zM30 30c10 0 14-8 14-14-10 0-14 6-14 14zM30 20c-7 0-10-5-10-10 7 0 10 4 10 10z" fill="#b9d49c"/></symbol>
+<symbol id="i-flower" viewBox="0 0 60 60"><g fill="#f4e08f"><circle cx="30" cy="16" r="9"/><circle cx="44" cy="26" r="9"/><circle cx="39" cy="43" r="9"/><circle cx="21" cy="43" r="9"/><circle cx="16" cy="26" r="9"/></g><circle cx="30" cy="31" r="7" fill="#e3b94f"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 60 60"><path d="M16 42a10 10 0 010-20 14 14 0 0126-3 11 11 0 012 23z" fill="#cfe3c8"/></symbol>
+</defs></svg>
+<div id="bg"></div>
+<div id="app">
+
+<section class="panel on" id="home" aria-label="Accueil">
+ <div class="scroll">
+  <svg class="hero" viewBox="0 0 360 200" aria-hidden="true">
+   <circle cx="262" cy="74" r="74" fill="#efe2a0" opacity=".3"/><circle cx="262" cy="74" r="48" fill="#efe2a0" opacity=".9"/>
+   <path d="M0 150Q70 98 152 140T360 118V200H0Z" fill="#e2eed0"/>
+   <path d="M0 176Q92 132 192 170T360 158V200H0Z" fill="#c5dbae"/>
+   <path d="M70 160c-6-28 4-46 18-58 6 22-2 44-18 58z" fill="#8fb36f"/><path d="M70 160c4-18 16-30 30-34-2 16-14 30-30 34z" fill="#aac98c"/>
+  </svg>
+  <p class="hello" id="greet"></p>
+  <div class="clock" id="clock"></div>
+  <p class="date" id="day"></p>
+  <h1>Prenez un instant pour vous.</h1>
+  <button class="big main" id="go-new">Nouvelle entrée<small>Noter ce que je ressens, pas à pas</small></button>
+  <button class="big" id="go-guide">Guide des distorsions<small>Comprendre les pièges de pensée</small></button>
+  <button class="big" id="go-hist">Historique et tendances<small id="hcount">Statistiques, journal et export</small></button>
+  <p class="safe">Vos écrits restent sur votre téléphone.</p>
+ </div>
+</section>
+
+<section class="panel" id="flow" aria-label="Nouvelle entrée">
+ <div class="top"><button class="x" id="close" aria-label="Quitter">✕</button><div class="prog" aria-hidden="true"><i id="bar"></i></div></div>
+ <div id="stage">
+  <div class="slide on"><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>
+   <h2 class="q">Prenons un moment.</h2>
+   <p class="hint">Cette entrée est datée automatiquement.</p>
+   <div class="clock" id="s1time"></div><p class="date" id="s1date"></p>
+   <button class="link" id="editwhen" type="button">Modifier la date et l'heure</button>
+   <input type="datetime-local" id="when" hidden aria-label="Date et heure">
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-sprig"/></svg>
+   <h2 class="q">Qu'est-ce que je ressens ?</h2>
+   <p class="hint">Émotion, sensation… avec vos mots, dans la tête ou dans le corps.</p>
+   <textarea id="body" aria-label="Ressenti : émotion / sensation"></textarea>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <h2 class="q">Quelle émotion s'en approche ?</h2>
+   <p class="hint">Touchez un ou plusieurs visages.</p>
+   <div id="wheel"></div>
+   <div class="chips" id="chips" style="margin-top:10px"></div>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-flower"/></svg>
+   <h2 class="q">À quelle intensité ?</h2>
+   <p class="hint">De 1 (très faible) à 10 (maximale). Sans toucher au curseur, rien n'est enregistré.</p>
+   <input type="range" id="int" min="1" max="10" step="1" value="5" aria-label="Intensité du ressenti de 1 à 10">
+   <div class="ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+   <div class="row"><span>Faible</span><b id="intv">5</b><span>Maximale</span></div>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-cloud"/></svg>
+   <h2 class="q">Que se passait-il ?</h2>
+   <p class="hint">La situation ou l'événement.</p>
+   <textarea id="event" aria-label="Situation / événement"></textarea>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-sprig"/></svg>
+   <h2 class="q">Dans quel domaine de ma vie ?</h2>
+   <p class="hint">Un ou plusieurs domaines concernés.</p>
+   <div class="chips" id="domchips"></div>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-sprig"/></svg>
+   <h2 class="q">Quelle pensée m'a traversé l'esprit ?</h2>
+   <p class="hint">La première qui est venue, telle quelle.</p>
+   <textarea id="auto" aria-label="Pensée automatique"></textarea>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <h2 class="q">Un piège de pensée ?</h2>
+   <p class="hint">Reconnaissez-vous une distorsion ? Le guide de l'accueil vous aide.</p>
+   <div class="chips" id="dchips"></div>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>
+   <h2 class="q">Et si je voyais les choses autrement ?</h2>
+   <p class="hint">Une pensée alternative, plus nuancée.</p>
+   <textarea id="alt" aria-label="Pensée alternative"></textarea>
+  </div></div>
+  <div class="slide" data-opt><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-flower"/></svg>
+   <h2 class="q">Et maintenant, l'émotion est à quelle intensité ?</h2>
+   <p class="hint">De 1 à 10, après avoir pris du recul. Sans toucher au curseur, rien n'est enregistré.</p>
+   <input type="range" id="int2" min="1" max="10" step="1" value="5" aria-label="Intensité après réflexion de 1 à 10">
+   <div class="ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+   <div class="row"><span>Faible</span><b id="intv2">5</b><span>Maximale</span></div>
+  </div></div>
+  <div class="slide"><div class="in">
+   <svg class="ic" aria-hidden="true"><use href="#i-cloud"/></svg>
+   <h2 class="q">Merci d'avoir pris ce moment.</h2>
+   <p class="hint">Rien n'était obligatoire. Enregistrez quand vous le souhaitez.</p>
+  </div></div>
+ </div>
+ <div class="nav"><button class="btn ghost" id="back">Retour</button><button class="btn" id="next">Suivant</button></div>
+</section>
+
+<section class="panel" id="guide-p" aria-label="Guide des distorsions">
+ <div class="top"><button class="x" data-home aria-label="Retour à l'accueil">←</button><h2>Guide des distorsions</h2></div>
+ <div class="scroll">
+  <p class="intro">Les distorsions cognitives sont des façons de penser automatiques qui déforment la réalité et entretiennent les émotions difficiles. Les reconnaître aide à trouver une pensée plus nuancée. Une même pensée peut en contenir plusieurs.</p>
+  <div id="guide"></div>
+ </div>
+</section>
+
+<section class="panel" id="hist" aria-label="Historique et tendances">
+ <div class="top"><button class="x" data-home aria-label="Retour à l'accueil">←</button><h2>Historique et tendances</h2></div>
+ <div class="seg" id="subtabs"><button data-t="t" aria-pressed="true">Tendances</button><button data-t="w" aria-pressed="false">Semaine</button><button data-t="l" aria-pressed="false">Journal</button></div>
+ <div class="scroll">
+  <div id="sec-t">
+   <div class="seg sm"><button data-p="7">7 jours</button><button data-p="30">30 jours</button><button data-p="0">Tout</button></div>
+   <section class="card"><h3>Pistes pour travailler en TCC</h3><ul class="ins" id="ins"></ul><p class="note">Repères calculés à partir de vos propres entrées, à discuter avec votre thérapeute. Ils ne constituent pas un diagnostic.</p></section>
+   <div class="tiles" id="tiles"></div>
+   <section class="card"><h3>Émotions les plus fréquentes<small>Nombre d'entrées et intensité moyenne</small></h3><div id="b-emo"></div></section>
+   <section class="card"><h3>Domaines de vie</h3><div id="b-dom"></div></section>
+   <section class="card"><h3>Distorsions repérées</h3><div id="b-dist"></div></section>
+   <section class="card"><h3>Mots qui reviennent<small>Dans vos ressentis, situations et pensées</small></h3><div id="b-term"></div></section>
+   <section class="card"><h3>Moments de la journée</h3><div id="b-slot"></div></section>
+   <section class="card"><h3>Jours de la semaine</h3><div id="b-wd"></div></section>
+  </div>
+  <div id="sec-w" hidden>
+   <div class="wknav"><button class="x" data-wk="-1" aria-label="Semaine précédente">‹</button><div><b id="wklabel"></b><br><button class="link" data-wk="0">Cette semaine</button></div><button class="x" data-wk="1" aria-label="Semaine suivante">›</button></div>
+   <div class="seg sm"><button data-m="emo">Émotions</button><button data-m="dom">Domaines</button></div>
+   <section class="card"><h3>Intensité jour après jour<small>Une couleur par émotion ou par domaine</small></h3><div id="wkchart"></div><div class="leg" id="wkleg"></div></section>
+   <h3 class="sub">Détail par jour</h3>
+   <div class="daystrip" id="daystrip"></div>
+   <div id="daydetail"></div>
+  </div>
+  <div id="sec-l" hidden>
+   <div id="list"></div>
+   <section class="card">
+    <label>Exporter pour analyse statistique <small id="count"></small></label>
+    <button class="btn sm" id="csv">Exporter en CSV</button>
+    <button class="btn ghost sm" id="json">Sauvegarde complète (JSON)</button>
+    <button class="btn ghost sm" id="copy">Copier le CSV</button>
+    <label for="imp" style="margin-top:14px">Restaurer une sauvegarde JSON</label>
+    <input type="file" id="imp" accept=".json,application/json">
+   </section>
+  </div>
+ </div>
+</section>
+
+</div>
+<div class="dlg" id="dlg" hidden><div class="dbox" role="dialog" aria-modal="true" aria-labelledby="dmsg"><p id="dmsg"></p><div class="drow"><button class="btn ghost" id="dno">Annuler</button><button class="btn" id="dyes">OK</button></div></div></div>
+<div id="toast" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+const EMO=["Joie","Tristesse","Colère","Peur","Anxiété","Honte","Culpabilité","Dégoût","Frustration","Solitude","Calme","Fierté","Surprise","Épuisement"];
+const WHEEL=[["Joie","#f7da7b"],["Fierté","#f5bf7a"],["Surprise","#f3c9a0"],["Calme","#a9dccb"],["Tristesse","#9bbfe3"],["Solitude","#b3b6e6"],["Épuisement","#c4c0d4"],["Peur","#c3a8e0"],["Anxiété","#d6b0dc"],["Honte","#eab0c6"],["Culpabilité","#e8a5a5"],["Colère","#ee8f84"],["Frustration","#f0a584"],["Dégoût","#b9d78f"]];
+const EY=(x,y,r=2.6)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#1f2d31" stroke="none"/>`;
+const PA=(d,f="none")=>`<path d="${d}" fill="${f}"/>`;
+const TEAR='<path d="M-9 1q-2.5 4 0 6q2.5-2 0-6z" fill="#7fb4ea" stroke="none"/>';
+const SWEAT='<path d="M18-14q-3 4 0 6q3-2 0-6z" fill="#7fb4ea" stroke="none"/>';
+const SADB=PA("M-13-9L-5-13")+PA("M13-9L5-13"),ANGB=PA("M-14-11L-4-6")+PA("M14-11L4-6");
+const FACES={
+Joie:[EY(-8,-4)+EY(8,-4)+PA("M-11 5Q0 19 11 5Z","#fff")],
+Fierté:[PA("M-12-3Q-8-8-4-3")+PA("M4-3Q8-8 12-3")+PA("M-9 7Q0 16 9 7")],
+Surprise:[PA("M-12-13Q-8-17-4-13")+PA("M4-13Q8-17 12-13")+EY(-8,-4,3.6)+EY(8,-4,3.6)+'<ellipse cx="0" cy="11" rx="4" ry="5.5" fill="#fff"/>'],
+Calme:[PA("M-12-4Q-8 0-4-4")+PA("M4-4Q8 0 12-4")+PA("M-7 8Q0 13 7 8")],
+Tristesse:[SADB+EY(-8,-3)+EY(8,-3)+PA("M-8 13Q0 6 8 13")+TEAR],
+Solitude:[PA("M-12-5H-4")+PA("M4-5H12")+EY(-8,-1,2.2)+EY(8,-1,2.2)+PA("M-6 11Q0 8 6 11")],
+Épuisement:[PA("M-12-3H-4")+PA("M4-3H12")+PA("M-11 2Q-8 4-5 2")+PA("M5 2Q8 4 11 2")+'<ellipse cx="0" cy="11" rx="3.5" ry="4.5" fill="#fff"/>'],
+Peur:[PA("M-13-12L-5-15")+PA("M13-12L5-15")+EY(-8,-4,3.6)+EY(8,-4,3.6)+PA("M-7 12Q-3.5 8 0 12Q3.5 16 7 12")+SWEAT],
+Anxiété:[SADB+EY(-8,-3)+EY(8,-3)+PA("M-8 11Q-4 8 0 11T8 11")+SWEAT],
+Honte:[SADB+EY(-8,0,2.2)+EY(8,0,2.2)+'<ellipse cx="-14" cy="6" rx="4.5" ry="3" fill="#f28aa5" stroke="none"/><ellipse cx="14" cy="6" rx="4.5" ry="3" fill="#f28aa5" stroke="none"/>'+PA("M-5 12Q-2 10 0 12Q2 14 5 12")],
+Culpabilité:[PA("M-13-8L-5-13")+PA("M13-8L5-13")+EY(-8,-1,2.2)+EY(8,-1,2.2)+PA("M-6 12Q0 10 6 12")],
+Colère:[ANGB+EY(-8,-1)+EY(8,-1)+PA("M-8 13Q0 6 8 13")],
+Frustration:[ANGB+EY(-8,-2)+EY(8,-2)+PA("M-9 9H9V14H-9Z","#fff")+PA("M-3 9V14")+PA("M3 9V14")],
+Dégoût:[PA("M-12-7L-5-4L-12-1")+PA("M12-7L5-4L12-1")+PA("M-9 11Q-4.5 8 0 11Q4.5 14 9 11")+'<path d="M-2 12q0 6 4 6q4 0 4-6z" fill="#f28aa5"/>']
+};
+const FBG={Colère:"#ffd9d2",Frustration:"#ffe3d3",Dégoût:"#e3f2c8"};
+function face(n){return `<circle r="24" fill="${FBG[n]||"#fffdf5"}"/>`+FACES[n][0]}
+function pol(r,a){a=a*Math.PI/180;return [280+r*Math.cos(a),280+r*Math.sin(a)]}
+function sector(i){const w=360/WHEEL.length,a0=-90-w/2+i*w,a1=a0+w,R=276,r=92;
+const [x0,y0]=pol(R,a0),[x1,y1]=pol(R,a1),[x2,y2]=pol(r,a1),[x3,y3]=pol(r,a0);
+return `M${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${r} ${r} 0 0 0 ${x3} ${y3}Z`}
+function secSVG(i,on){const [n,c]=WHEEL[i],mid=-90+i*360/WHEEL.length,[fx,fy]=pol(165,mid),[lx,ly]=pol(235,mid);
+return `<g class="sec" data-n="${n}" role="button" tabindex="0" aria-pressed="${on}" aria-label="${n}">
+<path d="${sector(i)}" fill="${c}" fill-opacity="${on?1:.62}" stroke="${on?"var(--ink)":"var(--card)"}" stroke-width="${on?5:2}" stroke-linejoin="round"/>
+<g transform="translate(${fx} ${fy}) scale(1.2)" stroke="#1f2d31" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none">${face(n)}</g>
+<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="14.5" font-weight="700" fill="#1f2d31">${n}</text>
+${on?`<g transform="translate(${fx+27} ${fy-27})"><circle r="10" fill="var(--ink)"/><path d="M-4.5 0L-1 3.5L5 -3.5" stroke="var(--bg)" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`:""}</g>`}
+let lastN="",focusN="";
+function drawChips(){const idx=WHEEL.map((_,i)=>i),off=idx.filter(i=>!sel.has(WHEEL[i][0])),on=idx.filter(i=>sel.has(WHEEL[i][0]));
+$("wheel").innerHTML=`<svg viewBox="0 0 560 560" role="group" aria-label="Roue des émotions">${off.map(i=>secSVG(i,false)).join("")}${on.map(i=>secSVG(i,true)).join("")}
+<circle cx="280" cy="280" r="86" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+<text x="280" y="270" text-anchor="middle" font-size="${lastN.length>9?21:25}" font-weight="700" fill="var(--ink)">${lastN||"Mes émotions"}</text>
+<text x="280" y="300" text-anchor="middle" font-size="16" fill="var(--mute)">${sel.size?sel.size+" choisie"+(sel.size>1?"s":""):"Touchez un visage"}</text></svg>`;
+$("chips").innerHTML="";[...sel].forEach(n=>{const b=document.createElement("button");b.type="button";b.className="chip";b.setAttribute("aria-pressed","true");b.textContent=n+" ✕";b.onclick=()=>{sel.delete(n);lastN="";drawChips()};$("chips").appendChild(b)});
+if(focusN){const g=$("wheel").querySelector(`[data-n="${focusN}"]`);g&&g.focus();focusN=""}}
+function pick(g){if(!g)return;const n=g.dataset.n;sel.has(n)?sel.delete(n):sel.add(n);lastN=n;focusN=n;drawChips()}
+$("wheel").addEventListener("click",e=>pick(e.target.closest(".sec")));
+$("wheel").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(e.target.closest(".sec"))}});
+const KEY="journal-emotions-v1";
+const GUIDE=[
+["Catastrophisme","Imaginer le pire scénario et le considérer comme probable.","« Mon patron m'a convoqué : je vais être renvoyé et tout perdre. »"],
+["Pensée tout ou rien","Voir les choses en noir ou blanc, sans nuance.","« Si je ne réussis pas parfaitement, c'est un échec total. »"],
+["Lecture de pensée","Croire savoir ce que les autres pensent, sans preuve.","« Elle n'a pas répondu, elle doit me trouver ennuyeux. »"],
+["Généralisation excessive","Tirer une règle générale à partir d'un seul événement.","« J'ai raté cet entretien, je rate toujours tout. »"],
+["Raisonnement émotionnel","Prendre ce qu'on ressent pour la preuve que c'est vrai.","« Je me sens nul, donc je suis nul. »"],
+["Disqualification du positif","Écarter les réussites ou les compliments.","« Il dit ça pour être gentil, ça ne compte pas. »"],
+["Étiquetage","Se coller (ou coller aux autres) une étiquette globale.","« Je suis un raté » plutôt que « j'ai fait une erreur »."],
+["Personnalisation","Se croire responsable de ce qui ne dépend pas de soi.","« Mon ami est de mauvaise humeur, j'ai dû faire quelque chose. »"],
+["Devoirs / « il faut »","Se fixer des règles rigides et se juger sévèrement quand on y déroge.","« Je devrais toujours être efficace et disponible. »"],
+["Filtre mental","Ne retenir que le négatif d'une situation.","« Sur dix remarques, une critique : la présentation était mauvaise. »"],
+["Anticipation négative","Prédire que ça va mal se passer, comme si c'était déjà acquis.","« Je sais que cette soirée sera pénible, autant ne pas y aller. »"]
+];
+const DIST=GUIDE.map(g=>g[0]);
+let dsel=new Set(),touched=false,touchedI=false;
+function drawD(){$("dchips").innerHTML="";DIST.forEach(n=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=n;b.setAttribute("aria-pressed",dsel.has(n));b.onclick=()=>{dsel.has(n)?dsel.delete(n):dsel.add(n);drawD()};$("dchips").appendChild(b)})}
+let entries=[],sel=new Set();
+const c10=v=>v==null?null:Math.max(1,Math.min(10,Math.round(v/10)));
+function mig(e){if(e.s!==10){e.intensity=c10(e.intensity);e.after=c10(e.after);e.s=10}return e}
+function load(){try{entries=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){entries=[]}if(!Array.isArray(entries))entries=[];entries=entries.map(mig)}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(entries))}catch(e){toast("Stockage indisponible")}}
+function toast(t){const x=$("toast");x.textContent=t;x.classList.add("on");setTimeout(()=>x.classList.remove("on"),1800)}
+function localISO(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes())}
+function tick(){const d=new Date();$("clock").textContent=d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+$("day").textContent=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+function fmt(iso){return new Date(iso).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function resetForm(){$("when").value=localISO(new Date());["event","body","auto","alt"].forEach(i=>$(i).value="");
+$("int").value=5;$("intv").textContent="5";$("int2").value=5;$("intv2").textContent="5";touched=false;touchedI=false;sel.clear();dsel.clear();domsel.clear();drawD();drawDom();drawChips()}
+const DOMAINS=[["Travail / études","#e0a458"],["Famille","#7fb069"],["Couple","#e07a8f"],["Amitiés / vie sociale","#5fa8d3"],["Santé / corps","#46a98a"],["Argent","#b58b00"],["Image de soi","#9b7fd1"],["Loisirs / temps libre","#e0c040"],["Avenir / projets","#4f8fa3"],["Autre","#8e9aa0"]];
+let domsel=new Set();
+function drawDom(){$("domchips").innerHTML="";DOMAINS.forEach(([n])=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=n;b.setAttribute("aria-pressed",domsel.has(n));b.onclick=()=>{domsel.has(n)?domsel.delete(n):domsel.add(n);drawDom()};$("domchips").appendChild(b)})}
+const DAYS=["dim","lun","mar","mer","jeu","ven","sam"],WD=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"],WDO=[1,2,3,4,5,6,0];
+const f1=v=>String(Math.round(v*10)/10).replace(".",","),avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0,r0=Math.round;
+const isDark=()=>{try{return matchMedia("(prefers-color-scheme: dark)").matches}catch(e){return false}};
+function mix(h,t,a){const f=x=>parseInt(x,16),c=[1,3,5].map(i=>Math.round(f(h.substr(i,2))*(1-a)+f(t.substr(i,2))*a));return "#"+c.map(v=>v.toString(16).padStart(2,"0")).join("")}
+const LINEC={Joie:"#e6b800",Fierté:"#f28c28",Surprise:"#17a2b8",Calme:"#2e9e6b",Tristesse:"#2f6fbf",Solitude:"#6c63c9",Épuisement:"#7f8c8d",Peur:"#7d3c98",Anxiété:"#c44ea0",Honte:"#f06292",Culpabilité:"#8d5a3b",Colère:"#c0141c",Frustration:"#e4572e",Dégoût:"#7cb518"};
+const eCol=n=>{const c=LINEC[n]||"#888888";return isDark()?mix(c,"#ffffff",.28):c};
+const dCol=n=>(DOMAINS.find(d=>d[0]===n)||[0,"#8e9aa0"])[1];
+const STOP=new Set("avec,dans,pour,être,avoir,cette,comme,mais,aussi,fait,faire,plus,très,tout,tous,toute,toutes,bien,même,sans,sous,sont,suis,elle,elles,nous,vous,leur,leurs,notre,votre,alors,donc,puis,quand,parce,pourquoi,peut,peux,veux,vais,vont,était,étais,étaient,serait,sera,seront,avait,avais,aurait,encore,déjà,juste,trop,beaucoup,autre,autres,chose,choses,quelque,quelques,cela,celui,celle,ceux,entre,chez,vers,depuis,pendant,avant,après,moins,assez,ainsi,souvent,parfois,maintenant,fois,cest,etait,mes,tes,ces,nos,vos,dont,quoi,elles,sens,sent,pense,penser,pensé,ressens,ressent,ressenti,vraiment,comment,être,était,ça,quil,quon,lorsque,alors,pourtant,cependant,voir,vois,veut,dit,dire,aller,sentir,sentiment,émotion,sensation,envie".split(","));
+function terms(list){const c={};list.forEach(t=>{const s=new Set((t||"").toLowerCase().split(/[^a-zà-ÿœ]+/).filter(w=>w.length>=4&&!STOP.has(w)));s.forEach(w=>c[w]=(c[w]||0)+1)});return Object.entries(c).filter(x=>x[1]>=2).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))}
+function entryHTML(e,del){const t=new Date(e.when).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+const tg=a=>a.map(x=>`<span class="tag">${esc(x)}</span>`).join("");
+const I=(e.intensity!=null||e.after!=null)?`<span class="tag">${e.intensity!=null?e.intensity+"/10":"?"}${e.after!=null?" → "+e.after+"/10":""}</span>`:"";
+const P=(l,v)=>v?`<p><b>${l}</b><br>${esc(v)}</p>`:"";
+return `<article class="card e">${del?`<button class="del" data-id="${e.id}" aria-label="Supprimer">Supprimer</button>`:""}<time>${t}</time>
+<div class="tags">${tg(e.emotions)}${I}</div>${(e.domains||[]).length?`<div class="tags">${e.domains.map(x=>`<span class="tag" style="box-shadow:inset 0 0 0 1.5px ${dCol(x)}">${esc(x)}</span>`).join("")}</div>`:""}${(e.dist||[]).length?`<div class="tags">${tg(e.dist)}</div>`:""}
+${P("Ressenti",e.body)}${P("Situation / événement",e.event)}${P("Pensée automatique",e.auto)}${P("Pensée alternative",e.alt)}</article>`}
+function dayKey(w){return w.slice(0,10)}
+function dayLabel(k){return new Date(k+"T12:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+function renderLog(){const L=$("list");
+if(!entries.length){L.innerHTML='<div class="card empty">Aucune entrée. Votre première apparaîtra ici.</div>';return}
+const g={};entries.forEach(e=>(g[dayKey(e.when)]=g[dayKey(e.when)]||[]).push(e));
+L.innerHTML=Object.keys(g).sort().reverse().map(k=>{const A=g[k],V=A.filter(e=>e.intensity!=null);
+return `<div class="day"><b>${dayLabel(k)}</b><span>${A.length} entrée${A.length>1?"s":""}${V.length?" · intensité moy. "+f1(avg(V.map(e=>e.intensity)))+"/10":""}</span></div>`+A.map(e=>entryHTML(e,true)).join("")}).join("")}
+let period=30,wkMode="emo",selDay=null,subtab="t";
+function mon(d){d=new Date(d.getFullYear(),d.getMonth(),d.getDate());d.setDate(d.getDate()-(d.getDay()+6)%7);return d}
+let wkStart=mon(new Date());
+function inPeriod(){const lim=period?Date.now()-period*864e5:0;return entries.filter(e=>new Date(e.when).getTime()>=lim)}
+function agg(E,kf){const m={};E.forEach(e=>kf(e).forEach(k=>(m[k]=m[k]||[]).push(e.intensity)));return Object.entries(m).map(([k,a])=>{const v=a.filter(x=>x!=null);return{l:k,v:a.length,s:v.length?f1(avg(v))+"/10":"",m:v.length?avg(v):null}})}
+function bars(id,items,empty){const m=Math.max(1,...items.map(i=>i.v));$(id).innerHTML=items.length?items.map(i=>`<div class="bar"><span class="bl">${esc(i.l)}</span><div class="bt"><i style="width:${Math.max(4,i.v/m*100)}%;background:${i.c||"var(--acc)"}"></i></div><span class="bv">${i.v}${i.s?` <em>${i.s}</em>`:""}</span></div>`).join(""):`<p class="empty">${empty||"Pas encore assez de données."}</p>`}
+const byV=(a,b)=>b.v-a.v||a.l.localeCompare(b.l);
+function insights(E){const n=E.length;if(n<5)return["Continuez à remplir votre journal : les repères deviennent plus parlants à partir d'une dizaine d'entrées."];
+const o=[],b=x=>`<b>${esc(x)}</b>`,S=k=>k>1?"s":"";
+const em=agg(E,e=>e.emotions).sort(byV);if(em[0])o.push(`Émotion la plus fréquente : ${b(em[0].l)} (${em[0].v} fois${em[0].s?", intensité moyenne "+em[0].s:""}).`);
+const hi=em.filter(x=>x.m!=null&&x.v>=3).sort((a,c)=>c.m-a.m)[0];if(hi&&(!em[0]||hi.l!==em[0].l))o.push(`Émotion la plus intense en moyenne : ${b(hi.l)} (${hi.s}).`);
+const dm=agg(E,e=>e.domains||[]).sort(byV);if(dm[0])o.push(`Domaine le plus présent : ${b(dm[0].l)} (${dm[0].v} entrée${S(dm[0].v)}).`);
+const dh=dm.filter(x=>x.m!=null&&x.v>=3).sort((a,c)=>c.m-a.m)[0];if(dh&&(!dm[0]||dh.l!==dm[0].l))o.push(`Domaine le plus chargé émotionnellement : ${b(dh.l)} (intensité moyenne ${dh.s}).`);
+const di=agg(E,e=>e.dist||[]).sort(byV);if(di[0])o.push(`Piège de pensée le plus repéré : ${b(di[0].l)} (${di[0].v} fois) : un bon point de départ pour la restructuration cognitive.`);
+const sl=h=>h<5?"la nuit":h<12?"le matin":h<18?"l'après-midi":"le soir";
+const ts=agg(E,e=>[sl(+e.when.slice(11,13))]).filter(x=>x.m!=null&&x.v>=3).sort((a,c)=>c.m-a.m)[0];if(ts)o.push(`Les moments les plus intenses surviennent plutôt ${b(ts.l)} (intensité moyenne ${ts.s}).`);
+const at=terms(E.map(e=>e.auto)).slice(0,4).map(x=>x[0]);if(at.length)o.push(`Mots qui reviennent dans vos pensées automatiques : ${b(at.join(", "))}.`);
+const ABS=/\b(toujours|jamais|personne|tout le monde|rien|devrais|devrait|il faut|je dois|nul|nulle)\b/i,ab=E.filter(e=>ABS.test(e.auto||"")).length;
+if(ab)o.push(`Mots absolus ou obligations (« toujours », « jamais », « il faut »…) dans ${b(ab+" pensée"+S(ab))} automatique${S(ab)} : à explorer du côté de la pensée tout ou rien, de la généralisation, des « il faut ».`);
+const al=E.filter(e=>e.alt),dd=al.filter(e=>e.after!=null&&e.intensity!=null);
+if(dd.length){const m=avg(dd.map(e=>e.after-e.intensity));o.push(`Avec une pensée alternative, l'intensité varie en moyenne de ${b((m>0?"+":"")+f1(m)+" points")} (${dd.length} entrée${S(dd.length)}).`)}
+else o.push(al.length?`Pensée alternative rédigée dans ${al.length} entrée${S(al.length)} : renseignez aussi l'intensité après réflexion pour mesurer son effet.`:"Pas encore de pensée alternative rédigée : c'est un exercice à essayer.");
+return o}
+function renderTrends(){const E=inPeriod(),n=E.length,I=E.filter(e=>e.intensity!=null),D=E.filter(e=>e.intensity!=null&&e.after!=null);
+document.querySelectorAll("[data-p]").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.p===period));
+$("ins").innerHTML=insights(E).map(t=>`<li>${t}</li>`).join("");
+const dv=D.length?Math.round(avg(D.map(e=>e.after-e.intensity))*10)/10:null;
+$("tiles").innerHTML=[[n,"entrées"],[new Set(E.map(e=>dayKey(e.when))).size,"jours avec entrée"],[I.length?f1(avg(I.map(e=>e.intensity)))+"/10":"–","intensité moyenne"],[dv!=null?(dv>0?"+":"")+String(dv).replace(".",",")+" pts":"–","variation après réflexion"]].map(t=>`<div class="tile"><b>${t[0]}</b><span>${t[1]}</span></div>`).join("");
+const top=(a,k=10)=>a.sort(byV).slice(0,k);
+bars("b-emo",top(agg(E,e=>e.emotions)).map(x=>({...x,c:eCol(x.l)})));
+bars("b-dom",top(agg(E,e=>e.domains||[])).map(x=>({...x,c:dCol(x.l)})),"Aucun domaine renseigné pour le moment.");
+bars("b-dist",top(agg(E,e=>e.dist||[])),"Aucune distorsion repérée pour le moment.");
+bars("b-term",terms(E.flatMap(e=>[e.body,e.event,e.auto,e.alt])).slice(0,12).map(x=>({l:x[0],v:x[1]})),"Pas encore de mot qui revienne au moins deux fois.");
+const sl=h=>h<5?0:h<12?1:h<18?2:3,SN=["Nuit (0–5 h)","Matin (5–12 h)","Après-midi (12–18 h)","Soir (18–24 h)"];
+bars("b-slot",agg(E,e=>[SN[sl(+e.when.slice(11,13))]]).sort((a,b)=>SN.indexOf(a.l)-SN.indexOf(b.l)),"");
+bars("b-wd",agg(E,e=>[WD[new Date(e.when).getDay()]]).sort((a,b)=>WDO.indexOf(WD.indexOf(a.l))-WDO.indexOf(WD.indexOf(b.l))),"")}
+function renderWeek(){const days=[...Array(7)].map((_,i)=>{const d=new Date(wkStart);d.setDate(d.getDate()+i);return d}),K=days.map(d=>localISO(d).slice(0,10)),fm=d=>d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+$("wklabel").textContent=fm(days[0])+" – "+fm(days[6]);
+document.querySelectorAll("[data-m]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.m===wkMode));
+const S={};entries.forEach(e=>{const i=K.indexOf(dayKey(e.when));if(i<0||e.intensity==null)return;(wkMode==="emo"?e.emotions:(e.domains||[])).forEach(n=>{(S[n]=S[n]||[[],[],[],[],[],[],[]])[i].push(e.intensity)})});
+const names=Object.keys(S),col=n=>wkMode==="emo"?eCol(n):dCol(n),X=i=>46+i*47,Y=v=>196-(v-1)*19.5;let g="";
+[1,2,3,4,5,6,7,8,9,10].forEach(v=>{g+=`<line x1="38" x2="350" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="30" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--mute)">${v}</text>`});
+days.forEach((d,i)=>{g+=`<text x="${X(i)}" y="218" text-anchor="middle" font-size="11" fill="var(--mute)">${DAYS[d.getDay()]} ${d.getDate()}</text>`});
+names.forEach(n=>{const c=col(n),p=S[n].map((a,i)=>a.length?[X(i),Y(avg(a)),f1(avg(a))]:null).filter(Boolean);
+if(p.length>1)g+=`<polyline points="${p.map(q=>q[0]+","+q[1]).join(" ")}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+p.forEach(q=>g+=`<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="${c}" stroke="var(--bg)" stroke-width="1.5"><title>${esc(n)} : ${q[2]}/10</title></circle>`)});
+$("wkchart").innerHTML=names.length?`<svg viewBox="0 0 360 228" role="img" aria-label="Intensité par jour sur la semaine">${g}</svg>`:`<p class="empty">Aucune entrée avec intensité${wkMode==="dom"?" et domaine":" et émotion"} cette semaine.</p>`;
+$("wkleg").innerHTML=names.map(n=>`<span class="lg"><i style="background:${col(n)}"></i>${esc(n)}</span>`).join("");
+$("daystrip").innerHTML=days.map((d,i)=>{const c=entries.filter(e=>dayKey(e.when)===K[i]).length;return `<button data-d="${i}" aria-pressed="${selDay===i}"><span>${DAYS[d.getDay()]}</span><b>${d.getDate()}</b><em>${c||"·"}</em></button>`}).join("");
+const L=selDay==null?[]:entries.filter(e=>dayKey(e.when)===K[selDay]).sort((a,b)=>a.when.localeCompare(b.when));
+$("daydetail").innerHTML=selDay==null?'<p class="empty">Touchez un jour pour voir le détail de ses entrées.</p>':`<div class="day"><b>${dayLabel(K[selDay])}</b><span>${L.length} entrée${L.length>1?"s":""}</span></div>`+(L.length?L.map(e=>entryHTML(e,false)).join(""):'<p class="empty">Aucune entrée ce jour-là.</p>')}
+function renderStats(){subtab==="t"?renderTrends():subtab==="w"?renderWeek():0}
+function setTab(t){subtab=t;["t","w","l"].forEach(x=>$("sec-"+x).hidden=x!==t);document.querySelectorAll("#subtabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.t===t));renderStats()}
+function render(){const k=entries.length,s=k>1?"s":"";$("hcount").textContent=k?k+" entrée"+s+" · statistiques et export":"Statistiques, journal et export";$("count").textContent=k+" entrée"+s+" enregistrée"+s;renderLog();if($("hist").classList.contains("on"))renderStats()}
+$("hist").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;const d=b.dataset;
+if(d.t)setTab(d.t);else if(d.p!==undefined){period=+d.p;renderTrends()}
+else if(d.wk){if(d.wk==="0")wkStart=mon(new Date());else{wkStart=new Date(wkStart);wkStart.setDate(wkStart.getDate()+7*(+d.wk))}selDay=null;renderWeek()}
+else if(d.m){wkMode=d.m;renderWeek()}else if(d.d!==undefined){selDay=+d.d;renderWeek()}});
+$("int2").oninput=()=>{touched=true;$("intv2").textContent=$("int2").value};
+$("int").oninput=()=>{touchedI=true;$("intv").textContent=$("int").value};
+function doSave(){const e={id:Date.now(),when:$("when").value||localISO(new Date()),event:$("event").value.trim(),emotions:[...sel],
+s:10,intensity:touchedI?+$("int").value:null,after:touched?+$("int2").value:null,dist:[...dsel],domains:[...domsel],body:$("body").value.trim(),auto:$("auto").value.trim(),alt:$("alt").value.trim()};
+entries.unshift(e);entries.sort((a,b)=>b.when.localeCompare(a.when));persist();render();resetForm();toast("Entrée enregistrée");show("home")}
+function ask(msg,yes){return new Promise(res=>{$("dmsg").textContent=msg;$("dyes").textContent=yes;$("dlg").hidden=false;const end=v=>{$("dlg").hidden=true;$("dyes").onclick=$("dno").onclick=null;res(v)};$("dyes").onclick=()=>end(true);$("dno").onclick=()=>end(false);$("dno").focus()})}
+$("list").onclick=async ev=>{const id=ev.target.dataset.id;if(id&&await ask("Supprimer cette entrée ?","Supprimer")){entries=entries.filter(e=>e.id!=id);persist();render()}};
+const JOURS=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+function csvText(){const q=v=>'"'+String(v??"").replace(/"/g,'""').replace(/\s*\n\s*/g," ")+'"';
+const H=["id","date","heure","jour_semaine","situation","emotions",...EMO.map(n=>"emo_"+n),"intensite_avant","intensite_apres","variation","ressenti","pensee_automatique","pensee_alternative","distorsions",...DIST.map(n=>"dist_"+n),"domaines",...DOMAINS.map(d=>"dom_"+d[0])];
+const rows=[...entries].sort((a,b)=>a.when.localeCompare(b.when)).map(e=>{const d=new Date(e.when);
+return [e.id,e.when.slice(0,10),e.when.slice(11,16),JOURS[d.getDay()],q(e.event),q(e.emotions.join("|")),...EMO.map(n=>e.emotions.includes(n)?1:0),
+e.intensity??"",e.after??"",e.after!=null&&e.intensity!=null?e.after-e.intensity:"",q(e.body),q(e.auto),q(e.alt),q((e.dist||[]).join("|")),...DIST.map(n=>(e.dist||[]).includes(n)?1:0),q((e.domains||[]).join("|")),...DOMAINS.map(d=>(e.domains||[]).includes(d[0])?1:0)].join(";")});
+return "\ufeff"+H.join(";")+"\r\n"+rows.join("\r\n")}
+async function save(name,data){if(!entries.length){toast("Rien à exporter");return}
+let dl=null;try{dl=await (window.claude&&claude.use("downloads"))}catch(e){}
+if(dl){try{await dl.save({filename:name,data});toast("Fichier prêt")}catch(e){if(e&&e.code!=="declined")toast("Export impossible")}return}
+try{const u=URL.createObjectURL(new Blob([data],{type:"text/plain;charset=utf-8"}));const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast("Fichier téléchargé");return}catch(e){}
+try{await navigator.clipboard.writeText(data);toast("Téléchargement indisponible : copié")}catch(e){toast("Export impossible")}}
+const stamp=()=>localISO(new Date()).slice(0,10);
+$("csv").onclick=()=>save("journal-emotions-"+stamp()+".csv",csvText());
+$("json").onclick=()=>save("journal-emotions-sauvegarde-"+stamp()+".json",JSON.stringify(entries,null,1));
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText(csvText());toast("CSV copié")}catch(e){toast("Copie impossible")}};
+$("imp").onchange=async ev=>{const f=ev.target.files[0];if(!f)return;try{const a=JSON.parse(await f.text());if(!Array.isArray(a))throw 0;
+const ids=new Set(entries.map(e=>e.id));let n=0;a.forEach(e=>{if(e&&e.when&&Array.isArray(e.emotions)&&!ids.has(e.id)){entries.push(mig(e));n++}});
+entries.sort((a,b)=>b.when.localeCompare(a.when));persist();render();toast(n+" entrée(s) ajoutée(s)")}catch(e){toast("Fichier invalide")}ev.target.value=""};
+$("guide").innerHTML=GUIDE.map(g=>`<details class="card"><summary>${esc(g[0])}</summary><div class="in2"><p>${esc(g[1])}</p><p class="ex">${esc(g[2])}</p></div></details>`).join("");
+load();tick();setInterval(tick,15000);resetForm();render();
+
+/* ---- Navigation : accueil / diaporama / guide / journal ---- */
+const STEPS=11;let step=0;
+function show(id){document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id===id))}
+function upd1(){const w=$("when").value?new Date($("when").value):new Date();
+$("s1time").textContent=w.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+$("s1date").textContent=w.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+function setStep(n){step=Math.max(0,Math.min(STEPS-1,n));
+document.querySelectorAll(".slide").forEach((s,i)=>{s.classList.toggle("on",i===step);s.classList.toggle("before",i<step)});
+$("bar").style.width=((step+1)/STEPS*100)+"%";$("back").style.visibility=step?"":"hidden";
+$("next").textContent=step===STEPS-1?"Enregistrer":"Suivant";
+$("bg").style.backgroundPosition=(step*11)+"% "+(step*8)+"%";
+document.querySelectorAll(".slide")[step].scrollTop=0}
+function startNew(){resetForm();$("when").hidden=true;$("editwhen").hidden=false;upd1();setStep(0);show("flow")}
+function dirty(){return $("body").value||$("event").value||$("auto").value||$("alt").value||sel.size||dsel.size||domsel.size||touched||touchedI}
+$("go-new").onclick=startNew;
+$("go-guide").onclick=()=>show("guide-p");
+$("go-hist").onclick=()=>{show("hist");setTab("t");render()};
+document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>show("home"));
+$("close").onclick=async()=>{if(!dirty()||await ask("Quitter sans enregistrer cette entrée ?","Quitter"))show("home")};
+$("back").onclick=()=>setStep(step-1);
+$("next").onclick=()=>step===STEPS-1?doSave():setStep(step+1);
+$("editwhen").onclick=()=>{$("when").hidden=false;$("editwhen").hidden=true;$("when").focus()};
+$("when").onchange=upd1;
+function hello(){const h=new Date().getHours();$("greet").textContent=(h<4||h>=18)?"Bonsoir":h<12?"Bonjour":"Bon après-midi"}
+hello();setInterval(hello,60000);
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
